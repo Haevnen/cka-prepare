@@ -1,0 +1,51 @@
+apiVersion: v2
+name: online-boutique
+description: Online Boutique microservices with Redis
+type: application
+version: 0.1.0
+appVersion: "v0.8.0"
+dependencies:
+  - name: microservice
+    alias: emailservice
+    version: 0.1.0
+    repository: file://charts/microservice
+  - name: microservice
+    alias: paymentservice
+    version: 0.1.0
+    repository: file://charts/microservice
+  - name: microservice
+    alias: shippingservice
+    version: 0.1.0
+    repository: file://charts/microservice
+  - name: microservice
+    alias: adservice
+    version: 0.1.0
+    repository: file://charts/microservice
+  - name: microservice
+    alias: currencyservice
+    version: 0.1.0
+    repository: file://charts/microservice
+  - name: microservice
+    alias: productcatalogservice
+    version: 0.1.0
+    repository: file://charts/microservice
+  - name: microservice
+    alias: recommendationservice
+    version: 0.1.0
+    repository: file://charts/microservice
+  - name: microservice
+    alias: cartservice
+    version: 0.1.0
+    repository: file://charts/microservice
+  - name: microservice
+    alias: checkoutservice
+    version: 0.1.0
+    repository: file://charts/microservice
+  - name: microservice
+    alias: frontend
+    version: 0.1.0
+    repository: file://charts/microservice
+  - name: redis
+    alias: redis-cart
+    version: 0.1.0
+    repository: file://charts/redis

@@ -1,0 +1,13 @@
+nameOverride: redis-cart
+image:
+  repository: redis
+  tag: alpine
+  pullPolicy: IfNotPresent
+replicaCount: 1
+containerPort: 6379
+service:
+  type: ClusterIP
+  port: 6379
+  targetPort: 6379
+storage:
+  emptyDir: {}
