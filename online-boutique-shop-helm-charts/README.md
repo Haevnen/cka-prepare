@@ -1,100 +1,77 @@
 # Online Boutique Shop on Kubernetes
 
-This project deploys a small online store to a Kubernetes cluster using the
-manifest in [`online-shop-config.yaml`](online-shop-config.yaml). The workloads
-are based on [`Google's Online Boutique microservices demo`](https://github.com/GoogleCloudPlatform/microservices-demo) 
+This repository packages Google's [Online Boutique microservices demo](https://github.com/GoogleCloudPlatform/microservices-demo) for Kubernetes. It includes a reusable Helm chart for the application services, a dedicated Redis chart, and two ways to deploy them.
 
-## What's Included
+## Chart Structure
 
-The application is split into services that communicate over Kubernetes
-Services:
-
-- `frontend` serves the store's web interface.
-- `checkoutservice` coordinates checkout with cart, product catalog, currency,
-	shipping, email, and payment services.
-- `cartservice` stores cart data in `redis-cart`.
-- `productcatalogservice` provides the product catalog.
-- `recommendationservice` and `adservice` provide product recommendations and
-	advertisements.
-- `currencyservice`, `shippingservice`, `emailservice`, and `paymentservice`
-	provide supporting checkout functions.
-
-Most services are exposed internally as `ClusterIP` Services. The frontend is
-exposed as a `NodePort` on port `32000`.
-
-![alt text](images/architecture.png)
-
-## Optimization
-
-- We have 10 similar Deployment and Service Configurations
-- Create **_Reusable K8s configuration_** for these services via Helm Chart
-  + 1 blueprint for Deployment and Service
-  + set values for individual microservices
-
-## Helm Chart Layout
-
-- `online-boutique-shop/` is the umbrella chart root.
-- `online-boutique-shop/charts/microservice/` is the reusable chart for core
-	application services.
-- `online-boutique-shop/charts/redis/` is the separate Redis chart.
-- `online-boutique-shop/values/` contains per-service overrides, Redis values,
-	and `umbrella.yaml` for the combined release.
-- `online-boutique-shop/values.yaml` contains the umbrella chart defaults;
-	Helm loads this file automatically.
-
-## Install Redis Separately
-
-To manage Redis as its own Helm release, run from this directory:
-
-```sh
-helm upgrade --install redis-cart ./online-boutique-shop/charts/redis \
-	-f ./online-boutique-shop/values/redis-cart.yaml
+```text
+online-boutique-shop/
+├── Chart.yaml                 # Umbrella chart metadata and dependencies
+├── charts/
+│   ├── microservice/          # Reusable chart for core application services
+│   └── redis/                 # Dedicated Redis chart
+├── helmfile.yaml              # Independent Helm releases
+├── scripts/
+│   ├── install-services.sh    # Install independent releases with Helm
+│   └── uninstall-services.sh  # Remove those releases
+└── values/
+    ├── <service>.yaml         # Values for each standalone service release
+    ├── redis-cart.yaml        # Standalone Redis values
 ```
 
-This creates the `redis-cart` Deployment and Service. The app services can
-then be installed as separate releases using their values files, for example:
+The `microservice` chart supplies shared Deployment and Service templates. Each values file configures one service's image, ports, environment, and Service type. Redis uses its own chart because its container and storage configuration differ from the application services.
+
+## Deployment
+
+Helmfile installs Redis and every core service as an independent Helm release. This is useful when you want to upgrade or remove a service on its own. Install Helm and Helmfile first, then run from the repository root:
 
 ```sh
-helm upgrade --install emailservice ./online-boutique-shop/charts/microservice \
-	-f ./online-boutique-shop/values/emailservice.yaml
+helmfile -f ./online-boutique-shop/helmfile.yaml sync
 ```
 
-To install Redis and all core services as separate Helm releases, use the
-helper script. It installs Redis first, then each service in sequence:
+To target a namespace other than `default`:
 
 ```sh
-bash ./scripts/install-services.sh
+helmfile -f ./online-boutique-shop/helmfile.yaml \
+  --namespace online-boutique sync
 ```
 
-Pass a namespace as the first argument to use a namespace other than `default`:
+The equivalent helper script uses Helm directly and accepts the namespace as its first argument:
 
 ```sh
-bash ./scripts/install-services.sh online-boutique
+./online-boutique-shop/scripts/install-services.sh
+./online-boutique-shop/scripts/install-services.sh online-boutique
 ```
 
-The script uses `helm upgrade --install`, so it can be run again to apply
-updated values to existing releases.
-
-## Install the Whole Shop as One Release
-
-The umbrella chart installs all application services and Redis under one Helm
-release. Build its local chart dependencies, then install it:
+Remove the Helmfile-managed releases with:
 
 ```sh
-helm dependency update ./online-boutique-shop
-helm upgrade --install online-boutique ./online-boutique-shop \
-	-f ./online-boutique-shop/values/umbrella.yaml
+helmfile -f ./online-boutique-shop/helmfile.yaml destroy
 ```
 
-To inspect the generated Kubernetes resources without installing them:
+Or remove the releases installed by the helper script with:
 
 ```sh
-helm template online-boutique ./online-boutique-shop \
-	-f ./online-boutique-shop/values/umbrella.yaml
+./online-boutique-shop/scripts/uninstall-services.sh
+./online-boutique-shop/scripts/uninstall-services.sh online-boutique
 ```
 
-Choose either the standalone Redis workflow or the umbrella workflow in a
-namespace. Do not install both there: both create resources named `redis-cart`.
+## Access the Frontend
 
-The Redis chart currently uses `emptyDir` storage for a simple demo. Its data
-does not persist if the Redis pod is replaced.
+The frontend Service is configured as a NodePort on `32000`. With Minikube, get a browser-accessible URL using:
+
+```sh
+minikube service frontend --url
+```
+
+Alternatively, forward the Service to local port `8080`:
+
+```sh
+kubectl port-forward service/frontend 8080:8080
+```
+
+Then open <http://localhost:8080>. Add `-n <namespace>` to `kubectl` commands if you deployed into a non-default namespace.
+
+![alt text](images/image.png)
+
+![alt text](images/image-1.png)
