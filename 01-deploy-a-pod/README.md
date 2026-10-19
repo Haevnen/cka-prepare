@@ -1,7 +1,7 @@
 # Deploy pod
 
 ## Create yaml and run a pod
-- Instead of typing the whole yaml file from scratch. Use `dry-run` command `kubectl run nginx --image nginx:1.27 --dry-run=client -o yaml > nginx.yaml`
+- Instead of typing the whole yaml file from scratch. Use `dry-run` command `kubectl run nginx --image=nginx --dry-run=client -o yaml > nginx.yaml`
 
 - And then apply yaml file by `kubectl apply -f nginx.yaml`
 
