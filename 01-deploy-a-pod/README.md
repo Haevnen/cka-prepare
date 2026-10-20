@@ -7,6 +7,8 @@
 
   ![alt text](images/pod.png)
 
+- Command to force apply changes for a pod `kubectl replace --force -f nginx.yaml`
+
 ## Problem
 
 ### 1. How to test connectivity with the application running inside a Pod
