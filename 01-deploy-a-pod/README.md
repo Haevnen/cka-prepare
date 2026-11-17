@@ -51,3 +51,7 @@
     ![alt text](images/option3.png)
 
     ![alt text](images/option31.png)
+
+### 2. How to attach debug container running busybox to a pod
+
+- `k debug web-pod --image busybox --target web-pod -it`
