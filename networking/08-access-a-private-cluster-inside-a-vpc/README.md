@@ -58,10 +58,16 @@
  + `172.16.0.2:6443` : destination server as seen from the SSH server
  + `6443` : port on your local host
 
-- `remote port forwarding` open a port on the SSH server and forward traffic back through SSH to a destination on my side (_e.g., you want a remote server to be able to access your local service_)
+    ![alt text](image-3.png)
+
+- `remote port forwarding` open a port on the SSH server and forward traffic back through SSH to a destination on my side (_e.g., Allowing a local development server to be accessed by a remote machine_)
   + `ssh -R 8080:localhost:3000 user@server`
   + `8080` is a remote port
 
-- `dynamic port forwarding` create a SOCKS proxy on my computer that sends traffic through SSH (_you don't specify destination port in advance - various destinations_)
+    ![alt text](image-4.png)
+
+- `dynamic port forwarding` is used to **forward all traffic sent to a specific port on the local** machine **to the remote server** through an encrypted SSH tunnel (_you don't specify destination port in advance - various destinations_)
   + `ssh -D 1080 user@server`
   + `SOCKS proxy` act as the server in between source/destination server, receive/forwards request and sends the responses back. Your application doesn't connect directly to the destination.
+    
+    ![alt text](image-5.png)
