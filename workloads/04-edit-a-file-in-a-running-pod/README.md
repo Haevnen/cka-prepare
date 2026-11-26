@@ -21,3 +21,5 @@
     ![alt text](image.png)
 
 - Now, you can edit the file via `/proc/1/root/var/www/html/index.html`
+
+    ![alt text](image-1.png)
